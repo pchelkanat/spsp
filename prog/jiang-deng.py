@@ -1,11 +1,10 @@
-import math
 import time
 from gmpy2 import root, powmod, gcd, sqrt
 
 import ecdsa.numbertheory as numth
 import numpy as np
 
-from prog.utils import n_to_s_d, readfile, writefile, clearfile
+from prog.utils import readfile, writefile, clearfile
 
 bases = [2, 3, 5, 7, 11, 13, 17, 19,
          23, 29, 31, 37, 41, 43, 47, 53]
@@ -21,14 +20,17 @@ class Signature():
 
 
 def Primes_modulo(primes):
-    # clearfile("primes/4k+1.txt")
-    # clearfile("primes/4k+3.txt")
-    # clearfile("primes/8k+1.txt")
-    # clearfile("primes/8k+5.txt")
-    # clearfile("primes/else.txt")
+    """
+    clearfile("primes/4k+1.txt")
+    clearfile("primes/4k+3.txt")
+    clearfile("primes/8k+1.txt")
+    clearfile("primes/8k+5.txt")
+    clearfile("primes/else.txt")
+    """
 
     p_1mod4, p_3mod4, p_1mod8, p_5mod8, p_else = [], [], [], [], []
     for p in primes:
+        print(p)
         if p % 8 == 5:
             p_5mod8.append(p)
         if p % 8 == 1:
@@ -37,24 +39,24 @@ def Primes_modulo(primes):
             p_1mod4.append(p)
         if p % 4 == 3:
             p_3mod4.append(p)
-        if p % 8 == 1:
-            p_1mod8.append(p)
         if p % 8 != 5 and p % 8 != 1 and p % 4 != 1 and p % 4 != 3:
             p_else.append(p)
-    """
-    p__1mod4 = str(p_1mod4)[1:-1].replace(",", "")
-    p__3mod4 = str(p_3mod4)[1:-1].replace(",", "")
-    p__1mod8 = str(p_1mod8)[1:-1].replace(",", "")
-    p__5mod8 = str(p_5mod8)[1:-1].replace(",", "")
-    p__else = str(p_else)[1: -1].replace(",", "")
 
+    """
+    p__1mod4 = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_1mod4))
+    p__3mod4 = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_3mod4))
+    p__1mod8 = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_1mod8))
+    p__5mod8 = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_5mod8))
+    p__else = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_else))
+    
+    
     writefile("primes/4k+1.txt", p__1mod4)
     writefile("primes/4k+3.txt", p__3mod4)
     writefile("primes/8k+1.txt", p__1mod8)
     writefile("primes/8k+5.txt", p__5mod8)
     writefile("primes/else.txt", p__else)
     """
-    return np.array(p_1mod4), np.array(p_3mod4), np.array(p_1mod8), np.array(p_5mod8), np.array(p_else)
+    return len(np.array(p_1mod4)), len(np.array(p_3mod4)), len(np.array(p_1mod8)), len(np.array(p_5mod8)), len(np.array(p_else))
 
 
 def Ord(p, a):
@@ -80,7 +82,7 @@ def Val(p, n):
     return e
 
 
-# вычисление сигнатуры способ 1 РАБОЧИЙ!!!
+# вычисление сигнатуры способ 1
 def Sign(v, p):
     sgm_v_p = []
     for a in v:
@@ -92,22 +94,15 @@ def Sign(v, p):
     return sgm_v_p
 
 
-# вычисление сигнатуры способ 2 Prop.1
-def Sign2(v, n):
+# вычисление сигнатуры для 4k+3
+def Sign2(v, p):
     sgm_v_p = []
-    s, d = n_to_s_d(n)
     for a in v:
-        temp = None
-        if a ** d % n == 1:
-            temp = 0
-
-        else:
-            for k in range(s):
-                if a ** (d * 2 ** k) % n == n - 1:
-                    temp = k + 1
-                    break
-
-        sgm_v_p.append(temp)
+        if gcd(int(a), int(p)) == 1:
+            if numth.jacobi(a, p) == 0:
+                sgm_v_p.append(0)
+            elif numth.jacobi(a, p) == -1:
+                sgm_v_p.append(1)
     return sgm_v_p
 
 
@@ -180,7 +175,7 @@ def step1(a_base):
     start_time = time.time()
     ###
     primes_dict = {}
-    for prime in primes[8:]:
+    for prime in primes[len(a_base) + 1:]:
         if prime < B:  # ограничение вычислений
             mu = Mu_p(a_base, prime)
             print(prime, mu)
@@ -204,17 +199,21 @@ def step1(a_base):
 
 
 # Вычисление одинаковых сигнатур
-def find_equal_signs(a_base):
-    clearfile(f"lib/equal_signs2.txt")
+def find_equal_signs(a_base, primes):
+    clearfile(f"lib/equal_signs_{a_base}.txt")
 
     ### Посчет времени работы
     start_time = time.time()
     ###
     signs_list = []  # так как нельзя вернуть словарь с ключом-списком, заводим список сигнатур
     primes_dict = {}  # ключами являются индексы в списке сигнатур
-    for prime in primes[9:]:
+    for prime in primes[len(a_base) + 1:]:
         print("finding equal ... %s" % (prime))
-        sign = Sign2(a_base, prime)
+        if prime % 4 == 3:
+            sign = Sign2(a_base, prime)
+        else:
+            sign = Sign(a_base, prime)
+
         if sign in signs_list:
             primes_dict[signs_list.index(sign)].append(prime)
         else:
@@ -234,7 +233,7 @@ def find_equal_signs(a_base):
     s = total_time
     for j in range(len(signs_list)):
         s += f"{j}   {equal_list[j].sign}    {equal_list[j].primes}\n"
-    writefile(f"lib/equal_signs2.txt", s)
+    writefile(f"lib/equal_signs_{a_base}.txt", s)
 
     return equal_list
 
@@ -677,6 +676,6 @@ def step_t_5(a_base, p1):
 
 
 if __name__ == "__main__":
-    find_equal_signs(bases[:9])
+    find_equal_signs(bases[:9],primes)
 
     # step0(Q11)
