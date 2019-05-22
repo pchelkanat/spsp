@@ -56,7 +56,8 @@ def Primes_modulo(primes):
     writefile("primes/8k+5.txt", p__5mod8)
     writefile("primes/else.txt", p__else)
     """
-    return len(np.array(p_1mod4)), len(np.array(p_3mod4)), len(np.array(p_1mod8)), len(np.array(p_5mod8)), len(np.array(p_else))
+    return len(np.array(p_1mod4)), len(np.array(p_3mod4)), len(np.array(p_1mod8)), len(np.array(p_5mod8)), len(
+        np.array(p_else))
 
 
 def Ord(p, a):
@@ -85,24 +86,23 @@ def Val(p, n):
 # вычисление сигнатуры способ 1
 def Sign(v, p):
     sgm_v_p = []
-    for a in v:
-        if gcd(int(a), int(p)) == 1:
-            ord = Ord(p, a)
-            val = Val(2, ord)
-            # print(a, p, ord, val)
-            sgm_v_p.append(val)
-    return sgm_v_p
-
-
-# вычисление сигнатуры для 4k+3
-def Sign2(v, p):
-    sgm_v_p = []
-    for a in v:
-        if gcd(int(a), int(p)) == 1:
-            if numth.jacobi(a, p) == 0:
-                sgm_v_p.append(0)
-            elif numth.jacobi(a, p) == -1:
-                sgm_v_p.append(1)
+    if p % 4 == 3:
+        for a in v:
+            if gcd(int(a), int(p)) == 1:
+                if numth.jacobi(a, p) == 0:
+                    sgm_v_p.append(0)
+                elif numth.jacobi(a, p) == -1:
+                    sgm_v_p.append(1)
+    elif p % 4 == 1:
+        for a in v:
+            if gcd(int(a), int(p)) == 1 and numth.jacobi(a, p) != -1:
+                ord = Ord(p, a)
+                val = Val(2, ord)
+                # print(a, p, ord, val)
+                sgm_v_p.append(val)
+            elif gcd(int(a), int(p)) == 1 and numth.jacobi(a, p) == -1:
+                val = Val(2, p - 1)
+                sgm_v_p.append(val)
     return sgm_v_p
 
 
@@ -209,11 +209,7 @@ def find_equal_signs(a_base, primes):
     primes_dict = {}  # ключами являются индексы в списке сигнатур
     for prime in primes[len(a_base) + 1:]:
         print("finding equal ... %s" % (prime))
-        if prime % 4 == 3:
-            sign = Sign2(a_base, prime)
-        else:
-            sign = Sign(a_base, prime)
-
+        sign = Sign(a_base, prime)
         if sign in signs_list:
             primes_dict[signs_list.index(sign)].append(prime)
         else:
@@ -676,6 +672,6 @@ def step_t_5(a_base, p1):
 
 
 if __name__ == "__main__":
-    find_equal_signs(bases[:9],primes)
+    find_equal_signs(bases[:9], primes)
 
     # step0(Q11)
