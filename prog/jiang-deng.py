@@ -85,25 +85,25 @@ def Val(p, n):
 
 # вычисление сигнатуры способ 1
 def Sign(v, p):
-    sgm_v_p = []
     if p % 4 == 3:
+        sgm_v_p = []
         for a in v:
-            if gcd(int(a), int(p)) == 1:
-                if numth.jacobi(a, p) == 0:
-                    sgm_v_p.append(0)
-                elif numth.jacobi(a, p) == -1:
-                    sgm_v_p.append(1)
+            if numth.jacobi(a, p) == 1:
+                sgm_v_p.append(0)
+            elif numth.jacobi(a, p) == -1:
+                sgm_v_p.append(1)
+        return sgm_v_p
     elif p % 4 == 1:
+        sgm_v_p = []
         for a in v:
-            if gcd(int(a), int(p)) == 1 and numth.jacobi(a, p) != -1:
-                ord = Ord(p, a)
-                val = Val(2, ord)
-                # print(a, p, ord, val)
-                sgm_v_p.append(val)
-            elif gcd(int(a), int(p)) == 1 and numth.jacobi(a, p) == -1:
+            if numth.jacobi(a, p) == -1:
                 val = Val(2, p - 1)
                 sgm_v_p.append(val)
-    return sgm_v_p
+            else:
+                ord = Ord(p, a)
+                val = Val(2, ord)
+                sgm_v_p.append(val)
+        return sgm_v_p
 
 
 def Lambda_p(a_base, p):
@@ -207,7 +207,7 @@ def find_equal_signs(a_base, primes):
     ###
     signs_list = []  # так как нельзя вернуть словарь с ключом-списком, заводим список сигнатур
     primes_dict = {}  # ключами являются индексы в списке сигнатур
-    for prime in primes[len(a_base) + 1:]:
+    for prime in primes[len(a_base):10000]:
         print("finding equal ... %s" % (prime))
         sign = Sign(a_base, prime)
         if sign in signs_list:
