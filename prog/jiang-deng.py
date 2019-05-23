@@ -1,7 +1,5 @@
-import itertools
-import sys
 import time
-from gmpy2 import root, gcd, sqrt
+from gmpy2 import root, gcd
 
 import ecdsa.numbertheory as numth
 import numpy as np
@@ -102,6 +100,7 @@ def Sign(v, p):
                 val = Val(2, p - 1)
                 sgm_v_p.append(val)
             else:
+                # print(f'a_base item {a},{p}')
                 ord = Ord(p, a)
                 val = Val(2, ord)
                 sgm_v_p.append(val)
@@ -317,8 +316,9 @@ def step2(t, a_base, B, equal_list):
 # Проверка равенства сигнатур для списка простых чисел
 def check_signs(a_base, primes):
     true_list = []
+    # print(primes)
     for i in range(len(primes) - 1):
-
+        # print(f"prime i {primes[i]} {primes[i+1]}")
         if Sign(a_base, primes[i]) == Sign(a_base, primes[i + 1]):
             true_list.append(True)
         else:
@@ -351,9 +351,9 @@ def checking_p(prev_p, b, lmd):
 # Нахождение последующего p для t>2
 def next_p(p_exist, a_base):
     b = int(np.prod(p_exist))
-    if check_signs(p_exist) and b / p_exist[-1] < Q11 / p_exist[-2]:
+    if check_signs(a_base, p_exist) and b / p_exist[-1] < Q11 / p_exist[-2]:
         lmd = Lambda_list(a_base, p_exist)
-        print(lmd)
+        # print(lmd)
         if gcd(b, lmd) == 1:
             p_next_list = checking_p(p_exist[-1], b, lmd)
             return p_next_list
@@ -522,79 +522,97 @@ def step_t_3(a_base, primes_list):
             p2_1k4 = readfile("primes/4k+1.txt")
             p2_5k8 = readfile("primes/8k+5.txt")
             p2_1k8 = readfile("primes/8k+1.txt")
-            mu_4 = readfile("lib/mu4.txt")
+            # mu_4 = readfile(f"lib/mu4.txt")
 
             if p1 % 4 == 3:
                 for p2 in p2_3k4:
-                    leg2 = []
-                    for a in a_base:
-                        leg2.append(numth.jacobi(a, p2))
-                    if leg1 == leg2 and p2 > p1:  # Prop.2 inverse is true
-                        b = int(p1 * p2)
-                        if b < 2 * 10 ** 6:  # a trick
-                            gcd_23 = int(gcd(2 ** (b - 1) - 1, 3 ** (b - 1) - 1))
-                            factor_list = numth.factorization(gcd_23)
-                            for i in range(len(factor_list)):
-                                p3 = factor_list[i][0]
-                                signss = check_signs(a_base, [p1, p2, p3])
-                                if p3 > p2 and p3 < Q11 / b and signss:
-                                    s += f"\np1 is 4k+3\np2 is 4k+3\np1*p2 < 2*10**6 (a trick)\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
-                                    n_list.append([p1, p2, p3])
-                        else:
-                            p_exist = np.array([p1, p2])
-                            p3_list = next_p(p_exist, a_base)
-                            for p3 in p3_list:
-                                signss = check_signs(a_base, [p1, p2, p3])
-                                if signss:
-                                    s += f"\np1 is 4k+3\np2 is 4k+3\np1*p2 > 2*10**6 (not a trick)\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
-                                    n_list.append([p1, p2, p3])
+                    if p2 > p1:
+                        leg2 = []
+                        for a in a_base:
+                            leg2.append(numth.jacobi(a, p2))
+                        if leg1 == leg2:  # Prop.2 inverse is true
+                            b = int(p1 * p2)
+                            if b < 2 * 10 ** 6:  # a trick
+                                gcd_23 = int(gcd(2 ** (b - 1) - 1, 3 ** (b - 1) - 1))
+                                factor_list = numth.factorization(gcd_23)
+                                for i in range(len(factor_list)):
+                                    p3 = factor_list[i][0]
+                                    signss = check_signs(a_base, [p1, p2, p3])
+                                    if p3 > p2 and p3 < Q11 / b and signss:
+                                        s += f"\np1 is 4k+3\np2 is 4k+3\np1*p2 < 2*10**6 (a trick)\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
+                                        n_list.append([p1, p2, p3])
+                            else:
+                                p_exist = np.array([p1, p2])
+                                p3_list = next_p(p_exist, a_base)
+                                if isinstance(p3_list, list):
+                                    for p3 in p3_list:
+                                        if p3 > p2:
+                                            signss = check_signs(a_base, [p1, p2, p3])
+                                            if signss:
+                                                s += f"\np1 is 4k+3\np2 is 4k+3\np1*p2 > 2*10**6 (not a trick)\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
+                                                n_list.append([p1, p2, p3])
+                                else:
+                                    continue
 
                 for p2 in p2_1k4:
                     if Mu_p(a_base, p2) == 4:
                         break  # переход к mu=4
             elif p1 % 8 == 5:
                 for p2 in p2_1k4:
-                    leg1 = numth.jacobi(2, p1)
-                    if leg1 == -1 and Val(2, Ord(p1, 2)) == 2:
-                        p_exist = np.array([p1, p2])
-                        p3_list = next_p(p_exist, a_base)
-                        for p3 in p3_list:
-                            signss = check_signs(a_base, [p1, p2, p3])
-                            if signss:
-                                s += f"\np1 is 8k+5\np2 is 4k+1\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
-                                n_list.append([p1, p2, p3])
+                    if p2 > p1:
+                        leg1 = numth.jacobi(2, p1)
+                        if leg1 == -1 and Val(2, Ord(p1, 2)) == 2:
+                            p_exist = np.array([p1, p2])
+                            p3_list = next_p(p_exist, a_base)
+                            if isinstance(p3_list, list):
+                                for p3 in p3_list:
+                                    if p3 > p2:
+                                        signss = check_signs(a_base, [p1, p2, p3])
+                                        if signss:
+                                            s += f"\np1 is 8k+5\np2 is 4k+1\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
+                                            n_list.append([p1, p2, p3])
+                            else:
+                                continue
 
                 if len(a_base) > 5:
                     a_base = a_base[:5]
                 for p2 in p2_5k8:
-
-                    leg2 = []
-                    for a in a_base:
-                        leg2.append(numth.jacobi(a, p2))
-                    if leg1 == leg2:
-                        p_exist = np.array([p1, p2])
-                        p3_list = next_p(p_exist, a_base)
-                        for p3 in p3_list:
-                            signss = check_signs(a_base, [p1, p2, p3])
-                            if signss:
-                                s += f"\np1 is 8k+5\np2 is 8k+5\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
-                                n_list.append([p1, p2, p3])
-
-                for p2 in p2_1k8:
-                    if p2 % 16 == 9:
+                    if p2 > p1:
                         leg2 = []
                         for a in a_base:
                             leg2.append(numth.jacobi(a, p2))
-                        if np.prod(leg2) == 1:  # если все 1, то произведение 1
+                        if leg1 == leg2:
                             p_exist = np.array([p1, p2])
                             p3_list = next_p(p_exist, a_base)
-                            for p3 in p3_list:
-                                signss = check_signs(a_base, [p1, p2, p3])
-                                if signss:
-                                    s += f"\np1 is 8k+5\np2 is 8k+1 or 16k+9\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
-                                    n_list.append([p1, p2, p3])
+                            if isinstance(p3_list, list):
+                                for p3 in p3_list:
+                                    if p3 > p2:
+                                        signss = check_signs(a_base, [p1, p2, p3])
+                                        if signss and p3 > p2:
+                                            s += f"\np1 is 8k+5\np2 is 8k+5\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
+                                            n_list.append([p1, p2, p3])
+                            else:
+                                continue
 
-                    if p2 % 16 == 1:
+                for p2 in p2_1k8:
+                    if p2 > p1 and p2 % 16 == 9:
+                        leg2 = []
+                        for a in a_base:
+                            leg2.append(numth.jacobi(a, p2))
+                        if np.prod(leg2) == 1 and p2 > p1:  # если все 1, то произведение 1
+                            p_exist = np.array([p1, p2])
+                            p3_list = next_p(p_exist, a_base)
+                            if isinstance(p3_list, list):
+                                for p3 in p3_list:
+                                    if p3 > p2:
+                                        signss = check_signs(a_base, [p1, p2, p3])
+                                        if signss and p3 > p2:
+                                            s += f"\np1 is 8k+5\np2 is 8k+1 or 16k+9\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
+                                            n_list.append([p1, p2, p3])
+                            else:
+                                continue
+
+                    elif p2 > p1 and p2 % 16 == 1:
                         if Mu_p(a_base, p2) == 4:
                             break  # переход к mu=4
             elif p1 % 8 == 1:
@@ -603,7 +621,7 @@ def step_t_3(a_base, primes_list):
                 if len(a_base) > 5:
                     a_base = a_base[:5]
                 for p2 in primes:
-                    if e == f:
+                    if p2 > p1 and e == f:
                         if p2 % (2 ** (e + 1)) == (1 + 2 ** e) % (2 ** (e + 1)):  # !!!! СКОБКИ???
                             leg2 = []
                             for a in a_base:
@@ -611,11 +629,15 @@ def step_t_3(a_base, primes_list):
                             if leg1 == leg2:
                                 p_exist = np.array([p1, p2])
                                 p3_list = next_p(p_exist, a_base)
-                                for p3 in p3_list:
-                                    signss = check_signs(a_base, [p1, p2, p3])
-                                    if signss:
-                                        s += f"\np1 is 8k+1\ne==f\nleg1==leg2\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
-                                        n_list.append([p1, p2, p3])
+                                if isinstance(p3_list, list):
+                                    for p3 in p3_list:
+                                        if p3 > p2:
+                                            signss = check_signs(a_base, [p1, p2, p3])
+                                            if signss:
+                                                s += f"\np1 is 8k+1\ne==f\nleg1==leg2\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
+                                                n_list.append([p1, p2, p3])
+                                else:
+                                    continue
 
 
                         elif p2 % 2 ** (e + 2) == (1 + 2 ** (e + 1)) % 2 ** (e + 2):
@@ -625,38 +647,51 @@ def step_t_3(a_base, primes_list):
                             if np.prod(leg2) == 1:
                                 p_exist = np.array([p1, p2])
                                 p3_list = next_p(p_exist, a_base)
-                                for p3 in p3_list:
-                                    signss = check_signs(a_base, [p1, p2, p3])
-                                    if signss:
-                                        s += f"\np1 is 8k+1\ne==f\nleg2==1\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
-                                        n_list.append([p1, p2, p3])
+                                if isinstance(p3_list, list):
+                                    for p3 in p3_list:
+                                        if p3 > p2:
+                                            signss = check_signs(a_base, [p1, p2, p3])
+                                            if signss:
+                                                s += f"\np1 is 8k+1\ne==f\nleg2==1\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
+                                                n_list.append([p1, p2, p3])
+                                else:
+                                    continue
 
 
                         elif p2 % (2 ** (e + 2)) == 1:
                             if Mu_p(a_base, p2) == 4:
                                 break  # переход к mu=4
 
-                    elif f < e:
+                    elif p2 > p1 and f < e:
                         if p2 % 2 ** f == p1:
                             if f == e - 1 and Mu_p(a_base, p2) == 2:
                                 p_exist = np.array([p1, p2])
                                 p3_list = next_p(p_exist, a_base)
-                                for p3 in p3_list:
-                                    signss = check_signs(a_base, [p1, p2, p3])
-                                    if signss:
-                                        s += f"\np1 is 8k+1\nf<e\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
-                                        n_list.append([p1, p2, p3])
+                                if isinstance(p3_list, list):
+                                    for p3 in p3_list:
+                                        if p3 > p2:
+                                            signss = check_signs(a_base, [p1, p2, p3])
+                                            if signss:
+                                                s += f"\np1 is 8k+1\nf<e\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
+                                                n_list.append([p1, p2, p3])
+                                else:
+                                    continue
 
             # p1 is any
-            for p2 in mu_4:
-                equal_list = find_equal_signs(a_base, mu_4)
-                for item in equal_list:
-                    primess = list(itertools.combitations(item.primes, 3))  # комбинации по 3 элемента
-                    for p in primess:
-                        p = list(p)
-                        if p[0] >= 29 and p[1] <= sqrt(Q11 / p1):
-                            s += f"\np1 is any\np2 in mu_4\n{p[0]}   {p[1]}   {p[2]}    {signss} {Sign(a_base,p1)}\n"
-                            n_list.append(list(p))
+            for p2 in mu_4:  # если p2 mu=4 то не обязательно чтобы и p1 mu=4, главное найти одинаковую сигнатуру!!!
+                if p2 > p1:
+                    p_exist = np.array([p1, p2])
+                    p3_list = next_p(p_exist, a_base)
+                    if isinstance(p3_list, list):
+                        for p3 in p3_list:
+                            if p3 > p2:
+                                signss = check_signs(a_base, [p1, p2, p3])
+                                if signss:
+                                    s += f"\np1 is 8k+1\nf<e\n{p1}   {p2}   {p3}    {signss} {Sign(a_base,p1)}\n"
+                                    n_list.append([p1, p2, p3])
+                    else:
+                        continue
+
 
             writefile(f"res/j'n'd/3/n_list_{a_base}_3_{primes_list[0]}.txt", s)
         else:
@@ -757,11 +792,11 @@ if __name__ == "__main__":
 
     # step_t_2(bases[:5], primes[25:1229])  # 10**2..10**5
     # step_t_2(bases[:5], primes[1229:9592])  # 10**5..10**6
-    step_t_2(bases[:2], primes[9592:78498])  # 10**6..10**7
+    # step_t_2(bases[:2], primes[9592:78498])  # 10**6..10**7
     # step_t_2(bases[:3], primes[78498:664579])#10**7..10**8
     # step_t_2(bases[:3], primes[664579:])#10**8..15*10**6
     # step1(bases[:3])
     # step1(bases[:7])
 
-    # step_t_3(bases[:5], primes[25:1229])  # 10**2..10**5
+    step_t_3(bases[:3], primes[25:1229])  # 10**2..10**5
     # step_t_3(bases[:5], primes[1229:9592])  # 10**5..10**6
