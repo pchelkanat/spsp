@@ -3,7 +3,7 @@ from gmpy2 import gcd, root
 import ecdsa.numbertheory as numth
 import numpy as np
 
-from prog.utils import readfile, n_to_s_d
+from utils import readfile, n_to_s_d
 
 bases = [2, 3, 5, 7, 11, 13, 17, 19,
          23, 29, 31, 37, 41, 43, 47, 53]
@@ -13,29 +13,22 @@ primes = readfile("primes/primes_1m.txt")
 
 
 class Signature():
-    def __init__(self, sign, primes_lmd, hash):
+    def __init__(self, sign, primes_lmd):
         self.sign = sign  # list
         self.primes = primes_lmd  # list
-        self.hash = hash
 
-
-class Hash_Table():
-    def __init__(self, signs):
-        self.signs = signs
-
-    def insert(self, sign, prime, lmd, hash):
-        if sign in self.signs:
-            temp = sign.primes
+    def insert(self, sign_p, prime, lmd):
+        if sign_p in signs:
+            temp = sign_p.primes
             if isinstance(temp, list):
                 temp.append([prime, lmd])
             else:
                 temp.append([[prime, lmd]])
-            sign.primes = sorted(temp)
-            sign.hash = hash
+            sign_p.primes = sorted(temp)
 
-    def fetch(self, sign):
-        if sign in self.signs:
-            return sign.primes, sign.hash
+    def fetch(self, sign_p):
+        if sign_p in signs:
+            return sign_p.primes
 
 
 def Ord(p, a):
@@ -61,7 +54,7 @@ def Val(p, n):
     return e
 
 
-# Сигнатура
+# вычисление сигнатуры способ 1
 def Sign(v, p):
     sgm_v_p = []
     for a in v:
@@ -70,6 +63,18 @@ def Sign(v, p):
             val = Val(2, ord)
             # print(a, p, ord, val)
             sgm_v_p.append(val)
+    return sgm_v_p
+
+
+# вычисление сигнатуры для 4k+3
+def Sign2(v, p):
+    sgm_v_p = []
+    for a in v:
+        if gcd(int(a), int(p)) == 1:
+            if numth.jacobi(a, p) == 0:
+                sgm_v_p.append(0)
+            elif numth.jacobi(a, p) == -1:
+                sgm_v_p.append(1)
     return sgm_v_p
 
 
@@ -197,4 +202,5 @@ def Gen_k(a_base, t, B, X):
 
 
 if __name__ == "__main__":
-    Sign(bases[:8], 11)
+    for p in primes[9:20]:
+        signs = Hash_Table()

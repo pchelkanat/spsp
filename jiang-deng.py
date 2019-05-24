@@ -1,10 +1,9 @@
 import time
 from gmpy2 import root, gcd
-
 import ecdsa.numbertheory as numth
 import numpy as np
 
-from prog.utils import readfile, writefile, clearfile, powmod
+from utils import readfile, writefile, clearfile, powmod
 
 bases = [2, 3, 5, 7, 11, 13, 17, 19,
          23, 29, 31, 37, 41, 43, 47, 53]
@@ -170,7 +169,7 @@ def step0(Q11):
 
 
 # Вычисляем мю для p
-def step1(a_base):
+def step1(a_base, primes):
     B = int(root(Q11, 2))
 
     ### Посчет времени работы
@@ -194,13 +193,13 @@ def step1(a_base):
     ###
 
     tot_s = total_time
-    clearfile(f"lib/mu/{a_base}/total_time.txt")
-    writefile(f"lib/mu/{a_base}/total_time.txt", tot_s)
+    clearfile(f"lib/mu/{a_base}_{primes[-1]}/total_time.txt")
+    writefile(f"lib/mu/{a_base}_{primes[-1]}/total_time.txt", tot_s)
 
     for item in primes_dict:
-        clearfile(f"lib/mu/{a_base}/mu_{item}.txt")
+        clearfile(f"lib/mu/{a_base}_{primes[-1]}/mu_{item}.txt")
         s = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(primes_dict[item]))
-        writefile(f"lib/mu/{a_base}/mu_{item}.txt", s)
+        writefile(f"lib/mu/{a_base}_{primes[-1]}/mu_{item}.txt", s)
 
     return primes_dict
 
@@ -366,8 +365,8 @@ def next_p(p_exist, a_base):
 
 
 def step_t_2(a_base, primes_list):
-    clearfile(f"res/j'n'd/2/{a_base}/spsp_{primes_list[0]}.txt")
-    clearfile(f"res/j'n'd/2/{a_base}/n_list_{primes_list[0]}.txt")
+    clearfile(f"res/jnd/2/{a_base}/spsp_{primes_list[0]}.txt")
+    clearfile(f"res/jnd/2/{a_base}/n_list_{primes_list[0]}.txt")
     n_list = []
 
     ### Посчет времени работы
@@ -479,7 +478,7 @@ def step_t_2(a_base, primes_list):
                                 s += f"\np1 is 8k+1\nf<e\n{p1}   {p2}    {signss} {Sign(a_base,p1)}\n"
                                 n_list.append([p1, p2])
 
-            writefile(f"res/j'n'd/2/{a_base}/n_list_{primes_list[0]}.txt", s)
+            writefile(f"res/jnd/2/{a_base}/n_list_{primes_list[0]}.txt", s)
         else:
             print(f"Value Error: p1 > {int(root(Q11, 2))}\n")
             break
@@ -498,13 +497,13 @@ def step_t_2(a_base, primes_list):
     ###
 
     ss += f"{total_time}\n"
-    writefile(f"res/j'n'd/2/{a_base}/spsp_{primes_list[0]}.txt", ss)
+    writefile(f"res/jnd/2/{a_base}/spsp_{primes_list[0]}.txt", ss)
     return np.array(spsp)
 
 
 def step_t_3(a_base, primes_list):
-    clearfile(f"res/j'n'd/3/{a_base}/spsp_{primes_list[0]}.txt")
-    clearfile(f"res/j'n'd/3/{a_base}/n_list_{primes_list[0]}.txt")
+    clearfile(f"res/jnd/3/{a_base}/spsp_{primes_list[0]}.txt")
+    clearfile(f"res/jnd/3/{a_base}/n_list_{primes_list[0]}.txt")
     n_list = []
 
     ### Посчет времени работы
@@ -696,7 +695,7 @@ def step_t_3(a_base, primes_list):
                     else:
                         continue
 
-            writefile(f"res/j'n'd/3/{a_base}/n_list_{primes_list[0]}.txt", s)
+            writefile(f"res/jnd/3/{a_base}/n_list_{primes_list[0]}.txt", s)
         else:
             print(f"Value Error: p1 > {int(root(Q11, 2))}\n")
             break
@@ -715,7 +714,7 @@ def step_t_3(a_base, primes_list):
     ###
 
     ss += f"{total_time}\n"
-    writefile(f"res/j'n'd/3/{a_base}/spsp_{primes_list[0]}.txt", ss)
+    writefile(f"res/jnd/3/{a_base}/spsp_{primes_list[0]}.txt", ss)
     return np.array(spsp)
 
 
@@ -792,7 +791,7 @@ def step_t_5(a_base, p1):
 if __name__ == "__main__":
     #print(sys.maxsize)
     #print(sys.version)
-    step1(bases[:2])
+    step1(bases[:2], primes[:1000])
     #step1(bases[:3])
     #step_t_2(bases[:9], primes[25:1229])  # 10**2..10**5
     #step_t_2(bases[:9], primes[1229:9592])  # 10**5..10**6
