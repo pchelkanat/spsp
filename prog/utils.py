@@ -75,5 +75,5 @@ def clearfile(path):
 def combinations(mylist, t):
     return np.array(list(itertools.combinations(mylist, t)), dtype=np.int32)
 
-# if __name__ == "__main__":
-# print(powmod(5, 97651 - 1, 97651))
+if __name__ == "__main__":
+    print()
