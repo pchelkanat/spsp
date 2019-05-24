@@ -171,7 +171,6 @@ def step0(Q11):
 
 # Вычисляем мю для p
 def step1(a_base):
-    clearfile(f"lib/mu_{a_base}.txt")
     B = int(root(Q11, 2))
 
     ### Посчет времени работы
@@ -193,10 +192,15 @@ def step1(a_base):
     ###
     total_time = "--- %s seconds ---\n" % (time.time() - start_time)
     ###
-    s = total_time
+
+    tot_s = total_time
+    clearfile(f"lib/mu/{a_base}/total_time.txt")
+    writefile(f"lib/mu/{a_base}/total_time.txt", tot_s)
+
     for item in primes_dict:
-        s += f"{mu}    {item[mu]}\n"
-    writefile(f"lib/mu_{a_base}.txt", s)
+        clearfile(f"lib/mu/{a_base}/mu_{item}.txt")
+        s = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(primes_dict[item]))
+        writefile(f"lib/mu/{a_base}/mu_{item}.txt", s)
 
     return primes_dict
 
@@ -362,8 +366,8 @@ def next_p(p_exist, a_base):
 
 
 def step_t_2(a_base, primes_list):
-    clearfile(f"res/j'n'd/2/spsp_{a_base}_2_{primes_list[0]}.txt")
-    clearfile(f"res/j'n'd/2/n_list_{a_base}_2_{primes_list[0]}.txt")
+    clearfile(f"res/j'n'd/2/{a_base}/spsp_{primes_list[0]}.txt")
+    clearfile(f"res/j'n'd/2/{a_base}/n_list_{primes_list[0]}.txt")
     n_list = []
 
     ### Посчет времени работы
@@ -475,7 +479,7 @@ def step_t_2(a_base, primes_list):
                                 s += f"\np1 is 8k+1\nf<e\n{p1}   {p2}    {signss} {Sign(a_base,p1)}\n"
                                 n_list.append([p1, p2])
 
-            writefile(f"res/j'n'd/2/n_list_{a_base}_2_{primes_list[0]}.txt", s)
+            writefile(f"res/j'n'd/2/{a_base}/n_list_{primes_list[0]}.txt", s)
         else:
             print(f"Value Error: p1 > {int(root(Q11, 2))}\n")
             break
@@ -494,13 +498,13 @@ def step_t_2(a_base, primes_list):
     ###
 
     ss += f"{total_time}\n"
-    writefile(f"res/j'n'd/2/spsp_{a_base}_2_{primes_list[0]}.txt", ss)
+    writefile(f"res/j'n'd/2/{a_base}/spsp_{primes_list[0]}.txt", ss)
     return np.array(spsp)
 
 
 def step_t_3(a_base, primes_list):
-    clearfile(f"res/j'n'd/3/spsp_{a_base}_3_{primes_list[0]}.txt")
-    clearfile(f"res/j'n'd/3/n_list_{a_base}_3_{primes_list[0]}.txt")
+    clearfile(f"res/j'n'd/3/{a_base}/spsp_{primes_list[0]}.txt")
+    clearfile(f"res/j'n'd/3/{a_base}/n_list_{primes_list[0]}.txt")
     n_list = []
 
     ### Посчет времени работы
@@ -522,7 +526,7 @@ def step_t_3(a_base, primes_list):
             p2_1k4 = readfile("primes/4k+1.txt")
             p2_5k8 = readfile("primes/8k+5.txt")
             p2_1k8 = readfile("primes/8k+1.txt")
-            # mu_4 = readfile(f"lib/mu4.txt")
+            mu_4 = readfile(f"lib/mu/{a_base}/mu_4.txt")
 
             if p1 % 4 == 3:
                 for p2 in p2_3k4:
@@ -677,8 +681,8 @@ def step_t_3(a_base, primes_list):
                                 else:
                                     continue
 
-            # p1 is any
-            for p2 in mu_4:  # если p2 mu=4 то не обязательно чтобы и p1 mu=4, главное найти одинаковую сигнатуру!!!
+            # p1 is any in primes
+            for p2 in mu_4:  # если p2 mu=4, то не обязательно чтобы и p1 mu=4, главное найти одинаковую сигнатуру!!!
                 if p2 > p1:
                     p_exist = np.array([p1, p2])
                     p3_list = next_p(p_exist, a_base)
@@ -692,8 +696,7 @@ def step_t_3(a_base, primes_list):
                     else:
                         continue
 
-
-            writefile(f"res/j'n'd/3/n_list_{a_base}_3_{primes_list[0]}.txt", s)
+            writefile(f"res/j'n'd/3/{a_base}/n_list_{primes_list[0]}.txt", s)
         else:
             print(f"Value Error: p1 > {int(root(Q11, 2))}\n")
             break
@@ -712,7 +715,7 @@ def step_t_3(a_base, primes_list):
     ###
 
     ss += f"{total_time}\n"
-    writefile(f"res/j'n'd/3/spsp_{a_base}_3_{primes_list[0]}.txt", ss)
+    writefile(f"res/j'n'd/3/{a_base}/spsp_{primes_list[0]}.txt", ss)
     return np.array(spsp)
 
 
@@ -787,16 +790,15 @@ def step_t_5(a_base, p1):
 
 
 if __name__ == "__main__":
-    print(sys.maxsize)
-    # print(sys.version)
-
-    # step_t_2(bases[:5], primes[25:1229])  # 10**2..10**5
-    # step_t_2(bases[:5], primes[1229:9592])  # 10**5..10**6
-    # step_t_2(bases[:2], primes[9592:78498])  # 10**6..10**7
+    #print(sys.maxsize)
+    #print(sys.version)
+    step1(bases[:2])
+    #step1(bases[:3])
+    #step_t_2(bases[:9], primes[25:1229])  # 10**2..10**5
+    #step_t_2(bases[:9], primes[1229:9592])  # 10**5..10**6
+    #step_t_2(bases[:2], primes[9592:78498])  # 10**6..10**7
     # step_t_2(bases[:3], primes[78498:664579])#10**7..10**8
     # step_t_2(bases[:3], primes[664579:])#10**8..15*10**6
-    # step1(bases[:3])
-    # step1(bases[:7])
 
-    step_t_3(bases[:3], primes[25:1229])  # 10**2..10**5
+    #step_t_3(bases[:3], primes[25:1229])  # 10**2..10**5
     # step_t_3(bases[:5], primes[1229:9592])  # 10**5..10**6
