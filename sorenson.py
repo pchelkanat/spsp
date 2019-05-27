@@ -3,6 +3,7 @@ from gmpy2 import gcd, root
 import ecdsa.numbertheory as numth
 import numpy as np
 
+from jaeschke import Val, Ord, Sign
 from utils import readfile, n_to_s_d
 
 bases = [2, 3, 5, 7, 11, 13, 17, 19,
@@ -15,7 +16,7 @@ primes = readfile("primes/primes_1m.txt")
 class Signature():
     def __init__(self, sign, primes_lmd):
         self.sign = sign  # list
-        self.primes = primes_lmd  # list
+        self.primes = primes  # list
 
     def insert(self, sign_p, prime, lmd):
         if sign_p in signs:
@@ -29,53 +30,6 @@ class Signature():
     def fetch(self, sign_p):
         if sign_p in signs:
             return sign_p.primes
-
-
-def Ord(p, a):
-    # p is prime
-    # a is integer that gcd(a,p)=1
-    # e is the smallest of a**e = 1 mod p
-    """
-    if math.gcd(p, a) == 1:
-        e = bsgs(a, 1, p)
-        return e
-    """
-    return numth.order_mod(a, p)
-
-
-def Val(p, n):
-    # p is prime
-    # n is integer
-    # e is the greatest power of p in n
-    e = 0
-    while n % p == 0:
-        n //= p
-        e += 1
-    return e
-
-
-# вычисление сигнатуры способ 1
-def Sign(v, p):
-    sgm_v_p = []
-    for a in v:
-        if gcd(int(a), int(p)) == 1:
-            ord = Ord(p, a)
-            val = Val(2, ord)
-            # print(a, p, ord, val)
-            sgm_v_p.append(val)
-    return sgm_v_p
-
-
-# вычисление сигнатуры для 4k+3
-def Sign2(v, p):
-    sgm_v_p = []
-    for a in v:
-        if gcd(int(a), int(p)) == 1:
-            if numth.jacobi(a, p) == 0:
-                sgm_v_p.append(0)
-            elif numth.jacobi(a, p) == -1:
-                sgm_v_p.append(1)
-    return sgm_v_p
 
 
 # Псевдопростое по базе
