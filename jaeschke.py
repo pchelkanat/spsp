@@ -1,10 +1,10 @@
 import time
-from gmpy2 import root
 
 import ecdsa.numbertheory as numth
 import numpy as np
+from gmpy2 import root
 
-from utils import powmod, readfile, clearfile, Signature, writefile
+from utils import powmod, readfile, clearfile, Signature, writefile, combinations
 
 bases = [2, 3, 5, 7, 11, 13, 17, 19,
          23, 29, 31, 37, 41, 43, 47, 53]
@@ -35,7 +35,7 @@ def Val(p, n):
     return e
 
 
-# вычисление сигнатуры способ 1
+# вычисление сигнатуры
 def Sign(v, p):
     if p % 4 == 3:
         sgm_v_p = []
@@ -83,25 +83,84 @@ def Mu_p(a_base, p):
     return mu
 
 
+# Вычисление одинаковых сигнатур
+def find_equal_signs(a_base, primes_list):
+    clearfile(f"lib/equal/{a_base}/equal_signs.txt")
+    clearfile(f"lib/equal/{a_base}/total_time.txt")
+
+    ### Посчет времени работы
+    start_time = time.time()
+    ###
+    signs_list = []  # так как нельзя вернуть словарь с ключом-списком, заводим список сигнатур
+    primes_dict = {}  # ключами являются индексы в списке сигнатур
+    for prime in primes_list[len(a_base):]:
+        print("finding equal ... %s" % (prime))
+        sign = Sign(a_base, prime)
+        if sign in signs_list:
+            primes_dict[signs_list.index(sign)].append(prime)
+        else:
+            signs_list.append(sign)
+            primes_dict[signs_list.index(sign)] = [prime]
+    ###
+    total_time = "--- %s seconds ---\n" % (time.time() - start_time)
+    ###
+
+    ### Преобразование по классу
+    equal_list = []
+    for j in range(len(signs_list)):
+        temp = Signature(signs_list[j], primes_dict[j])
+        equal_list.append(temp)
+
+    ###Запись в файл
+    tot_s = total_time
+    writefile(f"lib/equal/{a_base}/total_time.txt", tot_s)
+
+    s = ""
+    for j in range(len(signs_list)):
+        s += f"{j}    {equal_list[j].sign}    {equal_list[j].primes}\n"
+    writefile(f"lib/equal/{a_base}/equal_signs.txt", s)
+
+    return equal_list
+
+
+# Фильтр по t и B
+def screen_by_t(a_base, B, t, equal_list):
+    clearfile(f"lib/{B}/{t}/t_signs_{t}_{B}.txt")
+
+    ### Посчет времени работы
+    start_time = time.time()
+    ###
+    screening_list = []
+    for item in equal_list:  # item - простые числа с одинаковой сигнатурой
+        if len(item.primes) >= t - 1 and item.primes[0] > a_base[-1]:
+            # берем больше, так как позже будем проверять по группам p1*p2*...*p(t-1)^2<B
+            temp = Signature(item.sign, item.primes)
+            screening_list.append(temp)
+
+    combine = combinations
+
+    ###
+    total_time = "--- %s seconds ---\n" % (time.time() - start_time)
+    ###
+
+    ### Запись в файл
+    s = total_time
+    for j in range(len(screening_list)):
+        s = f"{j}    {screening_list[j].sign}    {screening_list[j].primes}\n"
+        writefile(f"lib/{B}/{t}/t_signs_{t}_{B}.txt", s)
+
+    return screening_list
+
+
 # Проверка равенства сигнатур для списка простых чисел
 def check_signs(a_base, primes):
     true_list = []
-    # print(primes)
     for i in range(len(primes) - 1):
-        # print(f"prime i {primes[i]} {primes[i+1]}")
         if Sign(a_base, primes[i]) == Sign(a_base, primes[i + 1]):
             true_list.append(True)
         else:
             true_list.append(False)
     return all(true_list)
-
-
-def t_more_3(a_base, B, primes):
-    if a_base[-1] < primes[0]:
-        if np.prod(primes) * primes[-1] < B:
-            if check_signs(a_base, primes):
-                for a in a_base:
-                    return
 
 
 # проверка псевдопростоты если n=pq, где q=2p-1
@@ -135,54 +194,98 @@ def psp(a_base, n):
     return all(arr)
 
 
-def t_2(a_base, B_l, B_h, primes_list):
-    clearfile(f"res/jae/2/{a_base}/spsp_{B_l}_{B_h}.txt")
+def t_2(a_base, B, primes_list):
+    clearfile(f"res/jae/2/{a_base}/spsp_{B//100}_{B}.txt")
     spsp = []
     ### Посчет времени работы
     start_time = time.time()
     ###
     i = 1
     for p in primes_list:
-        if p < int(root(B_h, 2)) and p > int(root(B_l, 2)):
+        if p < int(root(B, 2)):
             if p > a_base[-1]:
                 lmd_p = Lambda_p(a_base, p)
                 lmd = numth.lcm(lmd_p, 2)
-                for k in range(int(1 + (p - 1) / lmd), int((B_h - p) / (p * lmd)), 1):
+                for k in range(int(1 + (p - 1) / lmd), int((B - p) / (p * lmd)), 1):
                     q = 1 + k * lmd
-                    #print(q)
-                    if numth.is_prime(q) and q > p:
+                    if p * q <= B and p * q > B // 100:
+                        if numth.is_prime(q) and q > p:
+                            if q + 1 == 2 * p:
+                                if check_signs(a_base, [p, q]) and psp_2(a_base, [p, q]):
+                                    item = Signature(Sign(a_base, p), [p, q])
+                                    s = f"{i}    {np.prod(item.primes, dtype=np.uint32)}    {item.primes}    {item.sign}\n"
+                                    writefile(f"res/jae/2/{a_base}/spsp_{B//100}_{B}.txt", s)
+                                    i += 1
+                                    spsp.append(item)
+                                else:
+                                    continue
 
-                        if q + 1 == 2 * p:
-                            if psp_2(a_base, [p, q]) == True and check_signs(a_base, [p, q]) == True:
-                                item = Signature(Sign(a_base, p), [p, q])
-                                s = f"{i}   {np.prod(item.primes)}    {item.primes}   {item.sign}\n"
-                                writefile(f"res/jae/2/{a_base}/spsp_{B_l}_{B_h}.txt", s)
-                                i+=1
-                                spsp.append(item)
                             else:
-                                continue
+                                P = p * (1 + k * lmd)
+                                if psp(a_base, P) and check_signs(a_base, [p, q]):
+                                    item = Signature(Sign(a_base, p), [p, q])
+                                    s = f"{i}    {np.prod(item.primes, dtype=np.uint32)}    {item.primes}    {item.sign}\n"
+                                    writefile(f"res/jae/2/{a_base}/spsp_{B//100}_{B}.txt", s)
+                                    i += 1
+                                    spsp.append(item)
+                    # else:
+                    # break
+    ###
+    total_time = "--- %s seconds ---\n" % (time.time() - start_time)
+    ###
+    writefile(f"res/jae/2/{a_base}/spsp_{B//100}_{B}.txt", total_time)
+    return spsp
 
-                        else:
-                            P = p * (1 + k * lmd)
-                            if psp(a_base, P) and check_signs(a_base, [p, q]):
-                                item = Signature(Sign(a_base, p), [p, q])
-                                s = f"{i}   {np.prod(item.primes)}    {item.primes}   {item.sign}\n"
-                                writefile(f"res/jae/2/{a_base}/spsp_{B_l}_{B_h}.txt", s)
-                                i+=1
-                                spsp.append(item)
+
+def t_more_3(a_base, B, t, primes_list):
+    clearfile(f"res/jae/{t}/{a_base}/spsp_{B//100}_{B}.txt")
+    spsp = []
+    ### Посчет времени работы
+    start_time = time.time()
+    ###
+    i = 1
+    for p in primes_list:
+        if p < int(root(B, 2)):
+            if p > a_base[-1]:
+                print()
 
     ###
     total_time = "--- %s seconds ---\n" % (time.time() - start_time)
     ###
-    writefile(f"res/jae/2/{a_base}/spsp_{B_l}_{B_h}.txt", total_time)
+    writefile(f"res/jae/3/{a_base}/spsp_{B//100}_{B}.txt", total_time)
     return spsp
 
 
-if __name__ == "__main__":
-    #t_2(bases[:2], 0, 10 ** 6, primes)
-    #t_2(bases[:2], 10 ** 6, 10 ** 8, primes)
-    t_2(bases[:2], 10 ** 8, 10 ** 10, primes)
+def run_2():
+    t_2(bases[:2], 10 ** 6, primes)
+    t_2(bases[:2], 10 ** 8, primes)
+    # t_2(bases[:2], 10 ** 10, primes)
 
     # t_2(bases[:2], 10 ** 10, 10 ** 12, primes)
     # t_2(bases[:2], 10 ** 12, 10 ** 14, primes)
     # t_2(bases[:2], 10 ** 14, 10 ** 16, primes)
+
+
+def run_3():
+    t_2(bases[:3], 10 ** 6, primes)
+    t_2(bases[:3], 10 ** 8, primes)
+    # t_2(bases[:3], 10 ** 10, primes)
+
+    # t_2(bases[:3], 10 ** 10, 10 ** 12, primes)
+    # t_2(bases[:3], 10 ** 12, 10 ** 14, primes)
+    # t_2(bases[:3], 10 ** 14, 10 ** 16, primes)
+
+def equal_signs():
+    print(bases[:2])
+    find_equal_signs(bases[:2], primes)
+    print(bases[:3])
+    find_equal_signs(bases[:3], primes)
+    print(bases[:4])
+    find_equal_signs(bases[:4], primes)
+    print(bases[:5])
+    find_equal_signs(bases[:5], primes)
+
+
+if __name__ == "__main__":
+    print()
+    equal_signs()

@@ -2,6 +2,7 @@ import errno
 import itertools
 import os
 import re
+import sys
 
 import numpy as np
 from ecdsa.numbertheory import factorization
@@ -48,23 +49,29 @@ def check_n(n):
 # чтение из файла 1млн простых чисел
 def readfile(path):
     with open(path, 'r') as f:
-        arr = np.array(f.read().split(), dtype=np.int32)
+        arr = np.array(f.read().split(), dtype=np.uint32)
     f.close()
     return arr
 
 
 def parsefile(path):
     with open(path, 'r') as f:
-        equal_list = []
-        for line in f:
-            primes = np.array(re.findall(r'(\d{3,8})', line), dtype=np.uint32)
-            #print(primes)
-            s = re.sub(r'[\S\D+]','',re.sub(r'(.+: )','',line))
-            print(s)
-            #sign = np.array(re.sub(r"[\[\],]", '', s), dtype=np.int)
-            #print(sign)
-            #item = Signature(sign, primes)
-            #equal_list.append(item)
+        s = f.read()
+        signs, primes = None, None
+
+        if 'equal' in path:
+            signs = re.findall(r'(\[\d+.*\])\s{4}', s)
+            primes = re.findall(r'\s{4}(\[\d+.*\])', s)
+        elif 'n_list' in path:
+            primes = re.findall(r'(\[\d+.*\])\s{4}', s)
+            signs = re.findall(r'\s{4}(\[\d+.*\])', s)
+
+        signatures = []
+        for i in range(len(signs)):
+            item_s = list(map(int, re.sub(r'[\W]', '', signs[i])))
+            item_p = list(map(int, re.split(r' ', re.sub(r'[\[\],]', '', primes[i]))))
+            signatures.append(Signature(item_s, item_p))
+        return signatures
 
 
 def writefile(path, item):
@@ -137,7 +144,12 @@ def Primes_modulo(primes):
     return len(np.array(p_1mod4)), len(np.array(p_3mod4)), len(np.array(p_1mod8)), len(np.array(p_5mod8)), len(
         np.array(p_else))
 
+
 if __name__ == "__main__":
-    a_base = [2, 3]
-    primes_list = [101]
-    print(parsefile(f"res/jnd/2/{a_base}/n_list_{primes_list[0]}.txt"))
+    print(sys.version)
+    t = 2
+    a_base = [2, 3, 5]
+    B = 10 ** 8
+    # print(parsefile(f"lib/equal_test.txt"))
+    s = parsefile(f"res/jnd/{t}/{a_base}/n_list_{B//100}_{B}.txt")
+
