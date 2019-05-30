@@ -1,15 +1,17 @@
 import time
-from numba import cuda, jit
+from gmpy2 import root, gcd
+
 import ecdsa.numbertheory as numth
 import numpy as np
-from gmpy2 import root
+from numba import jit
 
-from utils import powmod, readfile, clearfile, Signature, writefile, combinations
+from utils import powmod, readfile, clearfile, Signature, writefile, combinations, parsefile
 
 bases = [2, 3, 5, 7, 11, 13, 17, 19,
          23, 29, 31, 37, 41, 43, 47, 53]
 
 primes = readfile("primes/primes_1m.txt")
+
 
 @jit
 def Ord(p, a):
@@ -22,6 +24,7 @@ def Ord(p, a):
         return e
     """
     return numth.order_mod(a, p)
+
 
 @jit
 def Val(p, n):
@@ -59,6 +62,7 @@ def Sign(v, p):
                 sgm_v_p.append(val)
         return sgm_v_p
 
+
 @jit
 def Lambda_p(a_base, p):
     ord_base = []
@@ -66,6 +70,7 @@ def Lambda_p(a_base, p):
         ord_base.append(Ord(p, a))
     lambda_p = numth.lcm(ord_base)
     return lambda_p
+
 
 @jit
 def Lambda_list(a_base, primes):
@@ -133,24 +138,26 @@ def screen_by_t(a_base, B, t, equal_list):
     ### Посчет времени работы
     start_time = time.time()
     ###
+
     screening_list = []
     for item in equal_list:  # item - простые числа с одинаковой сигнатурой
         if len(item.primes) >= t - 1 and item.primes[0] > a_base[-1]:
             # берем больше, так как позже будем проверять по группам p1*p2*...*p(t-1)^2<B
-            temp = Signature(item.sign, item.primes)
-            screening_list.append(temp)
-
-    combine = combinations
+            combine = combinations(item.primes, t - 1)  # в порядке возрастания
+            for prms in combine:
+                prod = np.prod(prms) * prms[-1]
+                if prod < B:
+                    screening_list.append(Signature(item.sign, prms))
 
     ###
     total_time = "--- %s seconds ---\n" % (time.time() - start_time)
     ###
 
     ### Запись в файл
-    s = total_time
     for j in range(len(screening_list)):
         s = f"{j}    {screening_list[j].sign}    {screening_list[j].primes}\n"
         writefile(f"lib/{B}/{t}/t_signs_{t}_{B}.txt", s)
+    writefile(f"lib/{B}/{t}/t_signs_{t}_{B}.txt", total_time)
 
     return screening_list
 
@@ -251,15 +258,39 @@ def t_more_3(a_base, B, t, primes_list):
     start_time = time.time()
     ###
     i = 1
-    for p in primes_list:
-        if p < int(root(B, 2)):
-            if p > a_base[-1]:
-                print()
+    equal_list = parsefile(f"lib/equal/{a_base}/equal_signs.txt")
+
+    for item in equal_list:  # item - простые числа с одинаковой сигнатурой
+        if len(item.primes) >= t - 1 and item.primes[0] > a_base[-1]:
+            # берем больше, так как позже будем проверять по группам p1*p2*...*p(t-1)^2<B
+            combine = combinations(item.primes, t - 1)  # в порядке возрастания
+            s = ""
+            for prms in combine:
+                prod = np.prod(prms)
+                if prod * prms[-1] < B:
+                    a = a_base[0]
+                    mu = Lambda_list([a], prms)
+                    if gcd(mu, prod) > 1:
+                        continue
+                    else:
+                        import gmpy2
+                        c = gmpy2.powmod(prod, -1, mu)
+                        for pt in primes_list:
+                            if pt > prms[-1] and pt <= B / prod and pt % mu == c:
+                                if psp(a_base, pt * prod) and check_signs(a_base, [pt, prms[-1]]):
+                                    item = Signature(Sign(a_base, pt), prms+[pt])
+                                    s = f"{i}    {np.prod(item.primes, dtype=np.uint32)}    {item.primes}    {item.sign}\n"
+                                    writefile(f"res/jae/{t}/{a_base}/spsp_{B//100}_{B}.txt", s)
+                                    i += 1
+                                    spsp.append(item)
+
+                else:
+                    break # к другому item'у т.к. combine упорядочен вертикально и горизонтально
 
     ###
     total_time = "--- %s seconds ---\n" % (time.time() - start_time)
     ###
-    writefile(f"res/jae/3/{a_base}/spsp_{B//100}_{B}.txt", total_time)
+    writefile(f"res/jae/е/{a_base}/spsp_{B//100}_{B}.txt", total_time)
     return spsp
 
 
