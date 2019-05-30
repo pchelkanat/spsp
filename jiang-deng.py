@@ -8,7 +8,7 @@ from numba import cuda, jit
 
 # from memory_profiler import profile
 from jaeschke import Mu_p, Sign, Lambda_list, Lambda_p, Val, psp, screen_by_t
-from utils import readfile, writefile, clearfile, powmod, Signature, parsefile
+from utils import readfile, writefile, clearfile, powmod, Signature, parsefile, combinations
 
 bases = [2, 3, 5, 7, 11, 13, 17, 19,
          23, 29, 31, 37, 41, 43, 47, 53]
@@ -630,6 +630,14 @@ def step_t_5(a_base, B, p1):
         ###
         n_list = []
         l = 5
+        equal_list=parsefile(f"lib/equal/{a_base}/equal_signs.txt")
+        for item in equal_list:  # item - простые числа с одинаковой сигнатурой
+            if len(item.primes) >= 5 and item.primes[0] > a_base[-1]:
+                # берем больше, так как позже будем проверять по группам p1*p2*...*p(t-1)^2<B
+                combine = combinations(item.primes, l)  # в порядке возрастания
+                for prms in combine:
+                    prod=np.prod(prms)
+                    #if prod<=B and prod/
 
         if p1 % 4 == 3:
             n_list = [p1]
