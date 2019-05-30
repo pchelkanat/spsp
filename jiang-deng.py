@@ -37,24 +37,22 @@ def step0(Q11):
 
 
 # Вычисляем мю для p
-def step1(a_base, B, primes):
+def step1(a_base, primes):
     clearfile(f"lib/mu/{a_base}/total_time.txt")
     ### Посчет времени работы
     start_time = time.time()
     ###
     primes_dict = {}
     for prime in primes[len(a_base):]:
-        if prime < B:  # ограничение вычислений
-            mu = Mu_p(a_base, prime)
-            print(prime, mu)
-            # if mu == 1:
-            #    continue
-            if mu in primes_dict.keys():
-                primes_dict[mu].append(prime)
-            else:
-                primes_dict[mu] = [prime]
+        mu = Mu_p(a_base, prime)
+        print(prime, mu)
+        # if mu == 1:
+        #    continue
+        if mu in primes_dict.keys():
+            primes_dict[mu].append(prime)
         else:
-            break
+            primes_dict[mu] = [prime]
+
     ###
     total_time = "--- %s seconds ---\n" % (time.time() - start_time)
     ###
@@ -333,7 +331,7 @@ def step_t_3(a_base, B):
                                     p3 = factor_list[i][0]
                                     if p3 * b <= B and p3 * b > B // 100:
                                         if p3 > p2:
-                                            f"p3 {p3}"
+                                            print(f"p3 {p3}")
                                             signss = check_signs(a_base, [p1, p3])
                                             if signss:
                                                 item = Signature(Sign(a_base, p1), [p1, p2, p3])
@@ -346,7 +344,7 @@ def step_t_3(a_base, B):
                                     for p3 in p3_list:
                                         if p3 * b <= B and p3 * b > B // 100:
                                             if p3 > p2:
-                                                f"p3 {p3}"
+                                                print(f"p3 {p3}")
                                                 signss = check_signs(a_base, [p1, p3])
                                                 if signss:
                                                     item = Signature(Sign(a_base, p1), [p1, p2, p3])
@@ -380,7 +378,7 @@ def step_t_3(a_base, B):
                                 for p3 in p3_list:
                                     if p3 * b <= B and p3 * b > B // 100:
                                         if p3 > p2:
-                                            f"p3 {p3}"
+                                            print(f"p3 {p3}")
                                             signss = check_signs(a_base, [p1, p3])
                                             if signss:
                                                 item = Signature(Sign(a_base, p1), [p1, p2, p3])
@@ -404,7 +402,7 @@ def step_t_3(a_base, B):
                                     for p3 in p3_list:
                                         if p3 * b <= B and p3 * b > B // 100:
                                             if p3 > p2:
-                                                f"p3 {p3}"
+                                                print(f"p3 {p3}")
                                                 signss = check_signs(a_base, [p1, p3])
                                                 if signss:
                                                     item = Signature(Sign(a_base, p1), [p1, p2, p3])
@@ -457,7 +455,7 @@ def step_t_3(a_base, B):
                                     for p3 in p3_list:
                                         if p3 * b <= B and p3 * b > B // 100:
                                             if p3 > p2:
-                                                f"p3 {p3}"
+                                                print(f"p3 {p3}")
                                                 signss = check_signs(a_base, [p1, p3])
                                                 if signss:
                                                     item = Signature(Sign(a_base, p1), [p1, p2, p3])
@@ -484,7 +482,7 @@ def step_t_3(a_base, B):
                                     for p3 in p3_list:
                                         if p3 * b <= B and p3 * b > B // 100:
                                             if p3 > p2:
-                                                f"p3 {p3}"
+                                                print(f"p3 {p3}")
                                                 signss = check_signs(a_base, [p1, p3])
                                                 if signss:
                                                     item = Signature(Sign(a_base, p1), [p1, p2, p3])
@@ -504,7 +502,7 @@ def step_t_3(a_base, B):
                                     for p3 in p3_list:
                                         if p3 * b <= B and p3 * b > B // 100:
                                             if p3 > p2:
-                                                f"p3 {p3}"
+                                                print(f"p3 {p3}")
                                                 signss = check_signs(a_base, [p1, p3])
                                                 if signss:
                                                     item = Signature(Sign(a_base, p1), [p1, p2, p3])
@@ -527,7 +525,7 @@ def step_t_3(a_base, B):
                         for p3 in p3_list:
                             if p3 * b <= B and p3 * b > B // 100:
                                 if p3 > p2:
-                                    f"p3 {p3}"
+                                    print(f"p3 {p3}")
                                     signss = check_signs(a_base, [p1, p3])
                                     if signss:
                                         item = Signature(Sign(a_base, p1), [p1, p2, p3])
@@ -749,8 +747,10 @@ if __name__ == "__main__":
     print(sys.version)
     # print((list(primes)).index(9999677)) #664560
     # print((list(primes)).index(999491)) #78464
-
-    run_t_2(2)
+    step1(bases[:2],primes)
+    step1(bases[:3],primes)
+    step1(bases[:4],primes)
+    #run_t_2(2)
     #run_t_3(4)
     # run_t_4(2)
     # run_t_5(2)
