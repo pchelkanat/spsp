@@ -264,7 +264,6 @@ def t_more_3(a_base, B, t, primes_list):
         if len(item.primes) >= t - 1 and item.primes[0] > a_base[-1]:
             # берем больше, так как позже будем проверять по группам p1*p2*...*p(t-1)^2<B
             combine = combinations(item.primes, t - 1)  # в порядке возрастания
-            s = ""
             for prms in combine:
                 prod = np.prod(prms)
                 if prod * prms[-1] < B:

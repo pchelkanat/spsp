@@ -6,6 +6,7 @@ import sys
 
 import numpy as np
 from ecdsa.numbertheory import factorization
+from numba import jit
 
 
 class Signature():
@@ -13,7 +14,7 @@ class Signature():
         self.sign = sign  # list
         self.primes = primes  # list
 
-
+@jit
 def n_to_s_d(n):
     d = n - 1
     power = 0
@@ -22,7 +23,7 @@ def n_to_s_d(n):
         power += 1
     return power, d
 
-
+@jit
 def powmod(a, x, p):
     x_bin = list(bin(x)[2:])
     a, p = np.uint32(a), np.uint32(p)
@@ -36,7 +37,7 @@ def powmod(a, x, p):
     return mod
 
 
-# проверка нечетного n на простые неповторяющиеся множители
+# проверка нечетного n на простые неповторяющиеся множители Пока не используется
 def check_n(n):
     arr = np.array(factorization(n))  # возвращает (число, его степень)
     temp = arr.T[1]
@@ -46,14 +47,14 @@ def check_n(n):
         return False
 
 
-# чтение из файла 1млн простых чисел
+# чтение из файла 1млн простых чисел и прочих
 def readfile(path):
     with open(path, 'r') as f:
         arr = np.array(f.read().split(), dtype=np.uint32)
     f.close()
     return arr
 
-
+# в основном парсинг n_list'ов и equql_signs
 def parsefile(path):
     with open(path, 'r') as f:
         s = f.read()
@@ -147,9 +148,12 @@ def Primes_modulo(primes):
 
 if __name__ == "__main__":
     print(sys.version)
-    t = 2
-    a_base = [2, 3, 5]
-    B = 10 ** 8
+    #t = 2
+    #a_base = [2, 3, 5]
+    #B = 10 ** 8
     # print(parsefile(f"lib/equal_test.txt"))
-    s = parsefile(f"res/jnd/{t}/{a_base}/n_list_{B//100}_{B}.txt")
-
+    #s = parsefile(f"res/jnd/{t}/{a_base}/n_list_{B//100}_{B}.txt")
+    a=[1,2,3,4,5,6,7,8,9,0]
+    combo=combinations(a,4)
+    for i in combo:
+        print(i)
