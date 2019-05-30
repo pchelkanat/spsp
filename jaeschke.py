@@ -1,5 +1,5 @@
 import time
-
+from numba import cuda, jit
 import ecdsa.numbertheory as numth
 import numpy as np
 from gmpy2 import root
@@ -11,7 +11,7 @@ bases = [2, 3, 5, 7, 11, 13, 17, 19,
 
 primes = readfile("primes/primes_1m.txt")
 
-
+@jit
 def Ord(p, a):
     # p is prime
     # a is integer that gcd(a,p)=1
@@ -23,7 +23,7 @@ def Ord(p, a):
     """
     return numth.order_mod(a, p)
 
-
+@jit
 def Val(p, n):
     # p is prime
     # n is integer
@@ -36,6 +36,7 @@ def Val(p, n):
 
 
 # вычисление сигнатуры
+@jit
 def Sign(v, p):
     if p % 4 == 3:
         sgm_v_p = []
@@ -58,7 +59,7 @@ def Sign(v, p):
                 sgm_v_p.append(val)
         return sgm_v_p
 
-
+@jit
 def Lambda_p(a_base, p):
     ord_base = []
     for a in a_base:
@@ -66,7 +67,7 @@ def Lambda_p(a_base, p):
     lambda_p = numth.lcm(ord_base)
     return lambda_p
 
-
+@jit
 def Lambda_list(a_base, primes):
     lmd_list = []
     for p in primes:
@@ -76,6 +77,7 @@ def Lambda_list(a_base, primes):
 
 
 # расчет "мю"
+@jit
 def Mu_p(a_base, p):
     lambda_p = Lambda_p(a_base, p)
     # print("a_base %s\nord_base %s\n lambda_p = %s" % (a_base, ord_base, lambda_p))
@@ -84,6 +86,7 @@ def Mu_p(a_base, p):
 
 
 # Вычисление одинаковых сигнатур
+
 def find_equal_signs(a_base, primes_list):
     clearfile(f"lib/equal/{a_base}/equal_signs.txt")
     clearfile(f"lib/equal/{a_base}/total_time.txt")
@@ -153,6 +156,7 @@ def screen_by_t(a_base, B, t, equal_list):
 
 
 # Проверка равенства сигнатур для списка простых чисел
+@jit
 def check_signs(a_base, primes):
     true_list = []
     for i in range(len(primes) - 1):
@@ -164,6 +168,7 @@ def check_signs(a_base, primes):
 
 
 # проверка псевдопростоты если n=pq, где q=2p-1
+@jit
 def psp_2(a_base, pq):
     p, q = pq[0], pq[1]
     if p % 4 == 1:  # Remark for psp(2,n). Так как ищем для нескольких баз, то учитываем сразу
@@ -178,6 +183,7 @@ def psp_2(a_base, pq):
 
 
 # проверка псевдопростоты по одной базе
+@jit
 def check_for_psp(a, n):
     mod = powmod(a, n - 1, n)
     if mod == 1:
@@ -187,6 +193,7 @@ def check_for_psp(a, n):
 
 
 # проверка псевдопростоты числа по нескольким базам
+@jit
 def psp(a_base, n):
     arr = []
     for a in a_base:
@@ -274,6 +281,7 @@ def run_3():
     # t_2(bases[:3], 10 ** 10, 10 ** 12, primes)
     # t_2(bases[:3], 10 ** 12, 10 ** 14, primes)
     # t_2(bases[:3], 10 ** 14, 10 ** 16, primes)
+
 
 def equal_signs():
     print(bases[:2])

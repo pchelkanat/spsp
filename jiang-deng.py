@@ -4,6 +4,7 @@ import time
 import ecdsa.numbertheory as numth
 import numpy as np
 from gmpy2 import root, gcd
+from numba import cuda, jit
 
 # from memory_profiler import profile
 from jaeschke import Mu_p, Sign, Lambda_list, Lambda_p, Val, psp, screen_by_t
@@ -70,6 +71,7 @@ def step1(a_base, B, primes):
 
 
 # Проверка равенства сигнатур для списка простых чисел
+@jit
 def check_signs(a_base, primes):
     true_list = []
     # print(primes)
@@ -83,6 +85,7 @@ def check_signs(a_base, primes):
 
 
 # Удовлетворение условиям p_next
+@jit
 def checking_p(b, lmd, B_h):
     p3_next_list = []
     ###Случай подбора
@@ -102,6 +105,7 @@ def checking_p(b, lmd, B_h):
 
 
 # Нахождение последующего p для t>2
+@jit
 def next_p(p_exist, a_base, B):
     b = int(np.prod(p_exist))
     if check_signs(a_base, p_exist) and b / p_exist[-1] < B / p_exist[-2]:
@@ -117,6 +121,7 @@ def next_p(p_exist, a_base, B):
 
 # @profile
 # @memprof(plot=True)
+
 def step_t_2(a_base, B, primes_list):
     clearfile(f"res/jnd/2/{a_base}/spsp_{B//100}_{B}.txt")
     clearfile(f"res/jnd/2/{a_base}/n_list_{B//100}_{B}.txt")
@@ -731,11 +736,11 @@ def run_t_4(base_len):
     print()
 
     # Готовы
-    #for i in range(6, 12, 2):
+    # for i in range(6, 12, 2):
     #    step_t_2(bases[:base_len], 10 ** i)
 
     # Не готовы
-    #for i in range(10, 18, 2):
+    # for i in range(10, 18, 2):
     #    step_t_2(bases[:base_len], 10 ** i, primes)
 
 
@@ -745,7 +750,7 @@ if __name__ == "__main__":
     # print((list(primes)).index(9999677)) #664560
     # print((list(primes)).index(999491)) #78464
 
-    #run_t_2(4)
-    run_t_3(4)
+    run_t_2(2)
+    #run_t_3(4)
     # run_t_4(2)
     # run_t_5(2)
