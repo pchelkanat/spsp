@@ -707,23 +707,26 @@ def step2(t, a_base, B, equal_list):
         return n_list  ###6 последовательностей, 0 spsp
 
 
-def run_t_2(base_len):
+def run_t_2():
     print()
     # Готовы
-    for i in range(6, 12, 2):
-        print(i)
-        step_t_2(bases[:base_len], 10 ** i, primes)
+    for i in range(6, 18, 2):
+        for j in range(3,4):
+            print(i,j)
+            step_t_2(bases[:j], 10 ** i, primes)
 
     # Не готовы
     # for i in range(10, 18, 2):
     #    step_t_2(bases[:base_len], 10 ** i, primes)
 
 
-def run_t_3(base_len):
+def run_t_3():
     print()
     # Готовы
     for i in range(6, 12, 2):
-        step_t_3(bases[:base_len], 10 ** i)
+        for i in range(2,4):
+            print(i,j)
+            step_t_3(bases[:j], 10 ** i)
 
     # Не готовы
     # for i in range(10, 18, 2):
@@ -747,10 +750,8 @@ if __name__ == "__main__":
     print(sys.version)
     # print((list(primes)).index(9999677)) #664560
     # print((list(primes)).index(999491)) #78464
-    step1(bases[:2],primes)
-    step1(bases[:3],primes)
-    step1(bases[:4],primes)
-    #run_t_2(2)
-    #run_t_3(4)
-    # run_t_4(2)
-    # run_t_5(2)
+    #step1(bases[:2],primes)
+    #step1(bases[:3],primes)
+    #step1(bases[:4],primes)
+
+    run_t_2()
