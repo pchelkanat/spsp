@@ -1,4 +1,4 @@
-from jaeschke import t_2
+from jaeschke import t_2, t_more_3
 from utils import readfile
 
 bases = [2, 3, 5, 7, 11, 13, 17, 19,
@@ -7,8 +7,6 @@ bases = [2, 3, 5, 7, 11, 13, 17, 19,
 primes = readfile("primes/primes_1m.txt")
 
 if __name__ == "__main__":
-    for i in range(6, 10, 2):
-        for j in range(2, 5):
-            print(i, j)
-            t_2(bases[:j], 10 ** i, primes)
+    print(2, 6)
+    t_more_3(bases[:2], 10 ** 6, primes)
 

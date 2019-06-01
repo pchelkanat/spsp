@@ -61,8 +61,8 @@ def parsefile(path):
         signs, primes = None, None
 
         if 'equal' in path:
-            signs = re.findall(r'(\[\d+.*\])\s{4}', s)
-            primes = re.findall(r'\s{4}(\[\d+.*\])', s)
+            signs = re.findall(r'(\[\d+.*\])\s{5}', s)
+            primes = re.findall(r'\s{5}(\[\d+.*\])', s)
         elif 'n_list' in path:
             primes = re.findall(r'(\[\d+.*\])\s{4}', s)
             signs = re.findall(r'\s{4}(\[\d+.*\])', s)
@@ -148,12 +148,8 @@ def Primes_modulo(primes):
 
 if __name__ == "__main__":
     print(sys.version)
-    #t = 2
-    #a_base = [2, 3, 5]
+    #t = 3
+    a_base = [2, 3]
     #B = 10 ** 8
-    # print(parsefile(f"lib/equal_test.txt"))
+    print(parsefile(f"lib/equal/{a_base}/equal_signs.txt"))
     #s = parsefile(f"res/jnd/{t}/{a_base}/n_list_{B//100}_{B}.txt")
-    a=[1,2,3,4,5,6,7,8,9,0]
-    combo=combinations(a,4)
-    for i in combo:
-        print(i)

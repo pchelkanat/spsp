@@ -125,7 +125,7 @@ def find_equal_signs(a_base, primes_list):
 
     s = ""
     for j in range(len(signs_list)):
-        s += f"{j}    {equal_list[j].sign}    {equal_list[j].primes}\n"
+        s += f"{j}    {equal_list[j].sign}     {equal_list[j].primes}\n"
     writefile(f"lib/equal/{a_base}/equal_signs.txt", s)
 
     return equal_list
@@ -155,7 +155,7 @@ def screen_by_t(a_base, B, t, equal_list):
 
     ### Запись в файл
     for j in range(len(screening_list)):
-        s = f"{j}    {screening_list[j].sign}    {screening_list[j].primes}\n"
+        s = f"{j}    {screening_list[j].sign}     {screening_list[j].primes}\n"
         writefile(f"lib/{B}/{t}/t_signs_{t}_{B}.txt", s)
     writefile(f"lib/{B}/{t}/t_signs_{t}_{B}.txt", total_time)
 
