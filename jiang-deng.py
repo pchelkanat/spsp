@@ -755,9 +755,11 @@ if __name__ == "__main__":
     print(sys.version)
     # print((list(primes)).index(9999677)) #664560
     # print((list(primes)).index(999491)) #78464
+
     step1(bases[:2],primes)
     step1(bases[:3],primes)
     step1(bases[:4],primes)
+
     #run_t_2(2)
     #run_t_3(4)
     # run_t_4(2)
