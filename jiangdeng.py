@@ -139,7 +139,7 @@ def step_t_2(a_base, B, primes_list):
                     factors = sorted(numth.factorization(gcd_23))
                     for i in range(len(factors)):
                         p2 = factors[i][0]
-                        if p2 * p1 <= 2*B:# and p1 * p2 > B // 100:
+                        if p2 * p1 <= B:# and p1 * p2 > B // 100:
                             if p2 > p1:  # В дальнейшем для того, чтобы числа в интервалах не повторялись
                                 signss = check_signs(a_base, [p1, p2])
                                 if signss:
@@ -656,57 +656,6 @@ def step_t_5(a_base, B, p1):
         print(f"Value Error: p1 > {int(root(B, 5))}")
 
 
-def step2(t, a_base, B, equal_list):
-    clearfile(f"{B}/{t}/l_signs_{t}_{B}.txt")
-
-    B_root = int(root(B, t))
-    if B > B_root:
-        B = B_root
-
-    if t >= 5:  # вместо умножения и последующео сравнения будем делить, ибо Memory Error
-        l = 5
-        screening_list = screen_by_t(t, a_base, B, equal_list)
-        ### Посчет времени работы
-        start_time = time.time()
-        ###
-        n_list = []
-        for item in screening_list:
-            scr_primes = item.primes
-
-            if scr_primes[0] % 4 == 3 and scr_primes[0] <= B:
-                # вычисление сигнатур через символ лежандра
-                base_prod = np.prod(a_base)
-                sign_p = numth.jacobi(base_prod, scr_primes[0])
-
-                k = 0
-                while scr_primes[0] + 24 * k < B:
-                    n_list.append(scr_primes[0] + 24 * k)
-                    k += 1
-
-            else:
-                P1 = B
-                for i in range(5):
-                    P1 /= scr_primes[i]
-                while l <= len(scr_primes):
-                    P2 = P1 * scr_primes[4] / scr_primes[l]
-                    if 1 <= B and 1 > P2:
-                        temp = Signature(item.sign, scr_primes)
-                        n_list.append(temp)
-                        break
-                    l += 1
-        ###
-        total_time = ("--- %s seconds ---" % (time.time() - start_time))
-        ###
-
-        ### Запись в файл
-        s = total_time
-        for j in range(len(n_list)):
-            s += f"{j}    {n_list[j].sign}    {n_list[j].primes}\n"
-        writefile(f"{B}/{t}/l_signs_{t}_{B}.txt", s)
-
-        return n_list  ###6 последовательностей, 0 spsp
-
-
 def run_t_2():
     print()
     # Готовы
@@ -748,10 +697,5 @@ def run_t_4(base_len):
 if __name__ == "__main__":
     print(sys.maxsize)
     print(sys.version)
-    # print((list(primes)).index(9999677)) #664560
-    # print((list(primes)).index(999491)) #78464
-    #step1(bases[:2],primes)
-    #step1(bases[:3],primes)
-    #step1(bases[:4],primes)
 
-    run_t_2()
+
