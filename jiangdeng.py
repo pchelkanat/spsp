@@ -121,8 +121,8 @@ def next_p(p_exist, a_base, B):
 # @memprof(plot=True)
 
 def step_t_2(a_base, B, primes_list):
-    clearfile(f"res/jnd/2/{a_base}/spsp_{B//100}_{B}.txt")
-    clearfile(f"res/jnd/2/{a_base}/n_list_{B//100}_{B}.txt")
+    clearfile(f"res/jnd/2/test/{a_base}/spsp_{B}.txt")
+    clearfile(f"res/jnd/2/test/{a_base}/n_list_{B}.txt")
     n_list = []
     ### Посчет времени работы
     start_time = time.time()
@@ -139,7 +139,7 @@ def step_t_2(a_base, B, primes_list):
                     factors = sorted(numth.factorization(gcd_23))
                     for i in range(len(factors)):
                         p2 = factors[i][0]
-                        if p2 * p1 <= B and p1 * p2 > B // 100:
+                        if p2 * p1 <= 2*B:# and p1 * p2 > B // 100:
                             if p2 > p1:  # В дальнейшем для того, чтобы числа в интервалах не повторялись
                                 signss = check_signs(a_base, [p1, p2])
                                 if signss:
@@ -152,10 +152,10 @@ def step_t_2(a_base, B, primes_list):
                     lmd_p = Lambda_p(a_base, p1)  # lmd_p = p1-1
                     p2 = 1
 
-                    while p2 <= p1 and p1 * p2 < B // 100:  # к условию, что p2>p1
+                    while p2 <= p1:# and p1 * p2 > B // 100:  # к условию, что p2>p1
                         p2 += lmd_p
 
-                    while p2 * p1 <= B and p1 * p2 > B // 100:
+                    while p2 * p1 <= B:# and p1 * p2 > B // 100:
                         signss = check_signs(a_base, [p1, p2])
                         if signss:
                             item = Signature(Sign(a_base, p1), [p1, p2])
@@ -175,7 +175,7 @@ def step_t_2(a_base, B, primes_list):
                         p2_4k1 = readfile("primes/4k+1.txt")
 
                         for p2 in p2_4k3:
-                            if p1 * p2 <= B and p1 * p2 > B // 100:
+                            if p1 * p2 <= B:# and p1 * p2 > B // 100:
                                 if p2 % lmd_p == 1 and p2 > p1:
                                     leg2 = []
                                     for a in a_base:
@@ -188,7 +188,7 @@ def step_t_2(a_base, B, primes_list):
                             # else:
                             # break
                         for p2 in p2_4k1:
-                            if p1 * p2 <= B and p1 * p2 > B // 100:
+                            if p1 * p2 <= B:# and p1 * p2 > B // 100:
                                 if p2 % lmd_p == 1 and p2 > p1:
                                     leg2 = []
                                     for a in a_base:
@@ -205,7 +205,7 @@ def step_t_2(a_base, B, primes_list):
                         p2_8k1 = readfile("primes/8k+1.txt")
 
                         for p2 in p2_8k5:
-                            if p1 * p2 <= B and p1 * p2 > B // 100:
+                            if p1 * p2 <= B:# and p1 * p2 > B // 100:
                                 if p2 % lmd_p == 5 and p2 > p1:
                                     leg2 = []
                                     for a in a_base:
@@ -218,7 +218,7 @@ def step_t_2(a_base, B, primes_list):
                             # else:
                             # break
                         for p2 in p2_8k1:
-                            if p1 * p2 <= B and p1 * p2 > B // 100:
+                            if p1 * p2 <= B:# and p1 * p2 > B // 100:
                                 if p2 % lmd_p == 1 and p2 > p1:
                                     leg2 = []
                                     for a in a_base:
@@ -235,7 +235,7 @@ def step_t_2(a_base, B, primes_list):
                         e, f = Val(2, p1 - 1), Val(2, sign)
 
                         for p2 in primes:
-                            if p1 * p2 <= B and p1 * p2 > B // 100:
+                            if p1 * p2 <= B:# and p1 * p2 > B // 100:
                                 if p2 > p1 and e == f:
                                     if p2 % (2 ** (e - 1)) == 2 ** e % (2 ** (e - 1)) and p2 % lmd_p == 1:
                                         leg2 = []
@@ -255,7 +255,7 @@ def step_t_2(a_base, B, primes_list):
                                             item = Signature(Sign(a_base, p1), [p1, p2])
                                             s += f"{item.primes}    {signss}    {item.sign}\n"
                                             n_list.append(item)
-                                elif p2 > p1 and f < e and p1 * p2 <= B and p1 * p2 > B // 100:
+                                elif p2 > p1 and f < e and p1 * p2 <= B:# and p1 * p2 > B // 100:
                                     signss = check_signs(a_base, [p1, p2])
                                     if p2 % lmd_p == 1 and signss:
                                         item = Signature(Sign(a_base, p1), [p1, p2])
@@ -263,7 +263,7 @@ def step_t_2(a_base, B, primes_list):
                                         n_list.append(item)
                             # else:
                             # break
-                writefile(f"res/jnd/2/{a_base}/n_list_{B//100}_{B}.txt", s)
+                writefile(f"res/jnd/2/test/{a_base}/n_list_{B}.txt", s)
         else:
             continue
 
@@ -281,7 +281,7 @@ def step_t_2(a_base, B, primes_list):
     ###
 
     ss += f"{total_time}\n"
-    writefile(f"res/jnd/2/{a_base}/spsp_{B//100}_{B}.txt", ss)
+    writefile(f"res/jnd/2/test/{a_base}/spsp_{B}.txt", ss)
     return np.array(spsp)
 
 
@@ -710,8 +710,8 @@ def step2(t, a_base, B, equal_list):
 def run_t_2():
     print()
     # Готовы
-    for i in range(6, 18, 2):
-        for j in range(3,4):
+    for i in range(6, 14, 2):
+        for j in range(2,4):
             print(i,j)
             step_t_2(bases[:j], 10 ** i, primes)
 
@@ -724,7 +724,7 @@ def run_t_3():
     print()
     # Готовы
     for i in range(6, 12, 2):
-        for i in range(2,4):
+        for j in range(2,4):
             print(i,j)
             step_t_3(bases[:j], 10 ** i)
 
