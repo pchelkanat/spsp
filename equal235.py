@@ -7,4 +7,4 @@ bases = [2, 3, 5, 7, 11, 13, 17, 19,
 primes = readfile("primes/primes_1m.txt")
 
 if __name__ == "__main__":
-    find_equal_signs(bases[:3], primes[500000])
+    find_equal_signs(bases[:3], primes[:100000])
