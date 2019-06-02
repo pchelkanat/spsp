@@ -8,4 +8,4 @@ primes = readfile("primes/primes_1m.txt")
 
 if __name__ == "__main__":
     print(2, 6)
-    t_2(bases[:2], 10 ** 6, primes)
+    t_2(bases[:2], 10 ** 8, primes)
