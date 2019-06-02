@@ -220,7 +220,7 @@ def t_2(a_base, B, primes_list):
             if p > a_base[-1]:
                 lmd_p = Lambda_p(a_base, p)
                 lmd = numth.lcm(lmd_p, 2)
-                for k in range(int(1 + (p - 1) / lmd), int((B - p) / (p * lmd)), 1):
+                for k in range(int(1 + (p - 1) / lmd), int((B - p) / (p * lmd))+1, 1):
                     q = 1 + k * lmd
                     if p * q <= B:# and p * q > B // 100:
                         if numth.is_prime(q) and q > p:
