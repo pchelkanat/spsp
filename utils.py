@@ -9,11 +9,14 @@ from ecdsa.numbertheory import factorization
 from numba import jit
 
 
+# Класс Сигнатуры
 class Signature():
     def __init__(self, sign, primes):
         self.sign = sign  # list
         self.primes = primes  # list
 
+
+# преобразование
 @jit
 def n_to_s_d(n):
     d = n - 1
@@ -23,6 +26,8 @@ def n_to_s_d(n):
         power += 1
     return power, d
 
+
+# возведение в степень по модулю
 @jit
 def powmod(a, x, p):
     x_bin = list(bin(x)[2:])
@@ -37,7 +42,7 @@ def powmod(a, x, p):
     return mod
 
 
-# проверка нечетного n на простые неповторяющиеся множители Пока не используется
+# проверка нечетного n на простые неповторяющиеся множители
 def check_n(n):
     arr = np.array(factorization(n))  # возвращает (число, его степень)
     temp = arr.T[1]
@@ -54,7 +59,8 @@ def readfile(path):
     f.close()
     return arr
 
-# в основном парсинг n_list'ов и equql_signs
+
+# в основном парсинг n_list'ов и equal_signs
 def parsefile(path):
     with open(path, 'r') as f:
         s = f.read()
@@ -75,6 +81,7 @@ def parsefile(path):
         return signatures
 
 
+# запись в файл
 def writefile(path, item):
     if not os.path.exists(path):
         try:
@@ -88,6 +95,7 @@ def writefile(path, item):
     f.close()
 
 
+# очистка файла
 def clearfile(path):
     if not os.path.exists(path):
         try:
@@ -105,14 +113,13 @@ def combinations(mylist, t):
     return np.array(list(itertools.combinations(mylist, t)), dtype=np.int32)
 
 
+# распределение простых чисел по классовым остаткам
 def Primes_modulo(primes):
-    """
     clearfile("primes/4k+1.txt")
     clearfile("primes/4k+3.txt")
     clearfile("primes/8k+1.txt")
     clearfile("primes/8k+5.txt")
     clearfile("primes/else.txt")
-    """
 
     p_1mod4, p_3mod4, p_1mod8, p_5mod8, p_else = [], [], [], [], []
     for p in primes:
@@ -128,28 +135,26 @@ def Primes_modulo(primes):
         if p % 8 != 5 and p % 8 != 1 and p % 4 != 1 and p % 4 != 3:
             p_else.append(p)
 
-    """
     p__1mod4 = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_1mod4))
     p__3mod4 = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_3mod4))
     p__1mod8 = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_1mod8))
     p__5mod8 = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_5mod8))
     p__else = ''.join(str(l) + ' ' + '\n' * (n % 8 == 7) for n, l in enumerate(p_else))
 
-
     writefile("primes/4k+1.txt", p__1mod4)
     writefile("primes/4k+3.txt", p__3mod4)
     writefile("primes/8k+1.txt", p__1mod8)
     writefile("primes/8k+5.txt", p__5mod8)
     writefile("primes/else.txt", p__else)
-    """
+
     return len(np.array(p_1mod4)), len(np.array(p_3mod4)), len(np.array(p_1mod8)), len(np.array(p_5mod8)), len(
         np.array(p_else))
 
 
 if __name__ == "__main__":
     print(sys.version)
-    #t = 3
+    # t = 3
     a_base = [2, 3]
-    #B = 10 ** 8
+    # B = 10 ** 8
     print(parsefile(f"lib/equal/{a_base}/equal_signs.txt"))
-    #s = parsefile(f"res/jnd/{t}/{a_base}/n_list_{B//100}_{B}.txt")
+    # s = parsefile(f"res/jnd/{t}/{a_base}/n_list_{B//100}_{B}.txt")
