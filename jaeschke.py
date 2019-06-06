@@ -227,7 +227,7 @@ def t_2(a_base, B, primes_list):
                             if q + 1 == 2 * p:
                                 if check_signs(a_base, [p, q]) and psp_2(a_base, [p, q]):
                                     item = Signature(Sign(a_base, p), [p, q])
-                                    s = f"{i}    {np.prod(item.primes, dtype=np.uint32)}    {item.primes}    {item.sign}\n"
+                                    s = f"{i}    {np.prod(item.primes)}    {item.primes}    {item.sign}\n"
                                     writefile(f"res/jae/2/{a_base}/spsp_{B}.txt", s)
                                     i += 1
                                     spsp.append(item)
@@ -238,7 +238,7 @@ def t_2(a_base, B, primes_list):
                                 P = p * (1 + k * lmd)
                                 if psp(a_base, P) and check_signs(a_base, [p, q]):
                                     item = Signature(Sign(a_base, p), [p, q])
-                                    s = f"{i}    {np.prod(item.primes, dtype=np.uint32)}    {item.primes}    {item.sign}\n"
+                                    s = f"{i}    {np.prod(item.primes)}    {item.primes}    {item.sign}\n"
                                     writefile(f"res/jae/2/{a_base}/spsp_{B}.txt", s)
                                     i += 1
                                     spsp.append(item)
@@ -278,7 +278,7 @@ def t_more_3(a_base, B, t, primes_list):
                             if pt > prms[-1] and pt <= B / prod and pt % mu == c:
                                 if psp(a_base, pt * prod) and check_signs(a_base, [pt, prms[-1]]):
                                     item = Signature(Sign(a_base, pt), prms + [pt])
-                                    s = f"{i}    {np.prod(item.primes, dtype=np.uint32)}    {item.primes}    {item.sign}\n"
+                                    s = f"{i}    {np.prod(item.primes)}    {item.primes}    {item.sign}\n"
                                     writefile(f"res/jae/{t}/{a_base}/spsp_{B}.txt", s)
                                     i += 1
                                     spsp.append(item)
